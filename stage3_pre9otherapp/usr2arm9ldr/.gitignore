@@ -1,0 +1,16 @@
+.vscode
+out
+build
+arm11/build
+sysmodules/loader/build
+sysmodules/rosalina/build
+chainloader/build
+exceptions/arm9/build
+exceptions/arm11/build
+*.bin
+*.firm
+*.o
+*.d
+*.elf
+*.cxi
+.DS_Store
