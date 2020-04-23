@@ -9,6 +9,7 @@ This is a new exploit for SAFE_MODE system updater. SAFE_MODE sysupdater is the 
 Download the zip archive under the Release tab above and follow the instructions inside. You will need some sort of userland exploit to install a hacked wifi save. Details for two suitable exploits are included.<br>
 Works on firmwares:<br>
 `old3ds 6.0 - latest`
+
 `new3ds 8.1 - latest (all versions)`
 
 ## Exploit 
