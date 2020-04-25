@@ -20,7 +20,7 @@ In order to prepare the necessary slot modification, userland execution is neede
 ## FAQ
 
 Q: Um, ... is this unsafe?<br>
-A: It's no more unsafe than any other full exploit chain in terms of user safety. The "unsafe" part is ribbing Nintendo for calling SAFE_MODE as such given, from their perspective, it's full of exploitable bugs (since they never backport fixes from NATIVE_FIRM). The name also refers to the exploit running "un"der SAFE_MODE firm, which is a unique (and nice) aspect of the version of safehax this exploit bootstraps.
+A: It's no more unsafe than any other full exploit chain in terms of user safety. The "unsafe" part is ribbing Nintendo for calling SAFE_MODE as such given, from their perspective, it's full of exploitable bugs (since they never backport fixes from NATIVE_FIRM). The name also refers to the exploit running un(der)SAFE_MODE firm, which is a unique (and nice) aspect of this version of safehax.
 
 Q: One of my shoulder buttons is hosed, what can I do?<br>
 A: Some people report that blowing hot humid air into the buttons temporarily allows them to work, but that's just gross and unsanitary (I'd totally do it, but I'm a weirdo).<br>
@@ -30,7 +30,7 @@ Q: You mentioned safehax a couple of times, does unSAFE_MODE have that?<br>
 A: It's bundled in, yes. Usm.bin contains the safehax code (and several other stages). It will automatically install boot9strap to firm0 for permanent cfw.
 
 Q: Is this fixable with a firmware update?<br>
-A: I think so. Nintendo has a weird track record ignoring my previous exploits, but they could fix this, and possibly do so without even touching SAFE_MODE titles (they prefer leaving SAFE_MODE untouched, as already mentioned). While the fix I'm thinking of is pretty straightforward, I'd rather not give any hints in the event they attempt to patch this exploit.
+A: I think so. Nintendo has a weird track record ignoring my previous exploits, but they could fix this, and possibly do so without even touching SAFE_MODE titles (they prefer leaving SAFE_MODE untouched, as already mentioned). While the fix I'm thinking of is pretty straightforward, I'd rather not give any hints right now.
 
 ## Thanks 
 This project is licensed as MIT except the code used and modified from these other projects:<br><br>
