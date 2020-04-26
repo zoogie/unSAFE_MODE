@@ -27,7 +27,7 @@ A: Some people report that blowing hot humid air into the buttons temporarily al
 The best plan B is probably to just use ntrboot or seedminer.
 
 Q: You mentioned safehax a couple of times, does unSAFE_MODE have that?<br>
-A: It's bundled in, yes. Usm.bin contains the safehax code (and several other stages). It will automatically install boot9strap to firm0 for permanent cfw.
+A: It's bundled in, yes. Usm.bin contains the safehax code (and several other stages). It will automatically install boot9strap to firm0/1 for permanent cfw.
 
 Q: Is this fixable with a firmware update?<br>
 A: I think so. Nintendo has a weird track record ignoring my previous exploits, but they could fix this, and possibly do so without even touching SAFE_MODE titles (they prefer leaving SAFE_MODE untouched, as already mentioned). While the fix I'm thinking of is pretty straightforward, I'd rather not give any hints right now.

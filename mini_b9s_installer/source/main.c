@@ -102,6 +102,9 @@ void main(void)
 			writeFirm(backup, false, boot9strap_size);  //attempt to restore old data should the b9s NAND write fail - still should be safe given firm1 backup even if this doesn't work
 			fail=2;
 		}
+		else{
+			writeFirm(boot9strap, true, boot9strap_size); //if successful, go ahead and write b9s to firm1 just in case
+		}
 	}
 	else{
 		fail=1;
