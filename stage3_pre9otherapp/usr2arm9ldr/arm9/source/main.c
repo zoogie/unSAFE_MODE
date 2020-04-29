@@ -125,12 +125,7 @@ static void patchSvcReplyAndReceive11(void)
 
 void main(void)
 {
-    bool payloadRead;
-    //memcpy((void *)0x23FFFE00, fbs, 2 * sizeof(struct fb));
-    for(int i=0;i<5;i++){
-	payloadRead = readPayload();
-	if(payloadRead==true) break;
-    }
+    memcpy((void*)0x23F00000, (void*)0x23D45000, 0x10000);
     //patchSvcReplyAndReceive11();
     //doFirmlaunch();
     //*(u32*)NULL=42;
