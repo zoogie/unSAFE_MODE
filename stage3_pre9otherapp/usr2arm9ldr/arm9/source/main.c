@@ -2,6 +2,7 @@
 #include "PXI.h"
 #include "arm11.h"
 #include "petitfs/pff.h"
+#include "i2c.h"
 
 #define CFG11_SHAREDWRAM_32K_DATA(i)    (*(vu8 *)(0x10140000 + i))
 #define CFG11_SHAREDWRAM_32K_CODE(i)    (*(vu8 *)(0x10140008 + i))
@@ -123,9 +124,33 @@ static void patchSvcReplyAndReceive11(void)
     patch[2] = svcTable[0x7C];;
 }
 
+u32 crc32(u8 *data, int size)
+{
+  u32 r = ~0; u8 *end = data + size;
+ 
+  while(data < end)
+  {
+    r ^= *data++;
+ 
+    for(int i = 0; i < 8; i++)
+    {
+      u32 t = ~((r&1) - 1); r = (r>>1) ^ (0xEDB88320 & t); 
+    }
+  }
+ 
+  return ~r;
+}
+
 void main(void)
 {
-    memcpy((void*)0x23F00000, (void*)0x23D45000, 0x10000);
+
+    u8 *minib9s=(void*)0x23D45000;
+    u32 crc=crc32(minib9s, 0x10000-4);
+    if(crc != *(u32*)(minib9s+0x10000-4)){
+	    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
+	    while(1);
+    }
+    memcpy((void*)0x23F00000, minib9s, 0x10000);
     //patchSvcReplyAndReceive11();
     //doFirmlaunch();
     //*(u32*)NULL=42;

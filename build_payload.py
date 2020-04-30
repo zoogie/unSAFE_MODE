@@ -1,4 +1,4 @@
-import os,sys,struct
+import os,sys,struct,binascii
 
 payload="\x00"*0x20000
 
@@ -51,6 +51,7 @@ with open("mini_b9s_installer/out/mini_b9s_installer.bin","rb") as f:
 if(len(b9s) > 0x10000):
 	print("Error: b9s_installer too large")
 	sys.exit(0)
+crc=binascii.crc32(b9s+("\x00"*(0x10000-len(b9s)-4))) & 0xffffffff
 
 with open("usm.bin","wb") as f:
 	f.write(payload)
@@ -64,5 +65,9 @@ with open("usm.bin","wb") as f:
 	f.write(code)
 	f.seek(0x10000)
 	f.write(b9s)
+	f.seek(0x20000-4)
+	f.write(struct.pack("<I",crc))
+	
+	
 
 print("Payload built")
