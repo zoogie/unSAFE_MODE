@@ -144,13 +144,13 @@ u32 crc32(u8 *data, int size)
 void main(void)
 {
 
-    u8 *minib9s=(void*)0x23D45000;
+    u8 *minib9s=(void*)0x23D45000;                        //(usm.bin + 0x10000) hardcoded virtual address should always be this hardcoded physical address. SAFE_MODE sysupdater isn't a paslr title.
     u32 crc=crc32(minib9s, 0x10000-4);
     if(crc != *(u32*)(minib9s+0x10000-4)){
-	    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
+	    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);  //power off if minib9s is corrupted
 	    while(1);
     }
-    memcpy((void*)0x23F00000, minib9s, 0x10000);
+    memcpy((void*)0x23F00000, minib9s, 0x10000);          //copy mini b9s installer to destination. PC will jump to that destination after this main returns (start.s handles this).
     //patchSvcReplyAndReceive11();
     //doFirmlaunch();
     //*(u32*)NULL=42;
