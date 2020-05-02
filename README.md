@@ -22,6 +22,9 @@ In order to prepare the necessary slot modification, userland execution is neede
 Q: Um, ... is this unsafe?<br>
 A: It's no more unsafe than any other full exploit chain in terms of user safety. The "unsafe" part is ribbing Nintendo for calling SAFE_MODE as such given, from their perspective, it's full of exploitable bugs (since they never backport fixes from NATIVE_FIRM). The name also refers to the exploit running un(der)SAFE_MODE firm, which is a unique (and nice) aspect of this version of safehax.
 
+Q: I see the abbreviation "USM" occasionally, I've think I've seen that before in this scene...
+A: Yeah, USM is coincidentely also the abbreviation for "Unnamed Smash Mod". That is not related to unSAFE_MODE at all, but you should [check it out](https://unnamedmods.com/) anyway because it's awesome!
+
 Q: One of my shoulder buttons is hosed, what can I do?<br>
 A: Some people report that blowing hot humid air into the buttons temporarily allows them to work, but that's just gross and unsanitary (I'd totally do it, but I'm a weirdo).<br>
 The best plan B is probably to just use ntrboot or seedminer.
