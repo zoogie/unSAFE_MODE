@@ -1,12 +1,27 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
+
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
+
+TOPDIR ?= $(CURDIR)
+include $(DEVKITARM)/base_tools
+
 HAXNAME := LoadCodeMset
+
+.PHONY: all clean
 
 all:	$(HAXNAME).dat
 
 clean:
-	rm -f $(HAXNAME).elf $(HAXNAME).dat
+	@rm -f $(HAXNAME).elf $(HAXNAME).dat
+	@echo clean...
 
 $(HAXNAME).dat: $(HAXNAME).elf
-	arm-none-eabi-objcopy -O binary $(HAXNAME).elf $(HAXNAME).dat
+	$(OBJCOPY) -O binary $(HAXNAME).elf $(HAXNAME).dat
+	@echo built ... $(notdir $@)
 
 $(HAXNAME).elf:	$(HAXNAME).s
-	arm-none-eabi-gcc -x assembler-with-cpp -nostartfiles -nostdlib -Ttext=0x00600000 $< -o $(HAXNAME).elf
+	$(CC) -x assembler-with-cpp -nostartfiles -nostdlib -Ttext=0x00600000 $< -o $(HAXNAME).elf
