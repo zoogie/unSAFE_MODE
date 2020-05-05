@@ -4,9 +4,10 @@
 
 NAME := $(notdir $(CURDIR))
 
-SUBFOLDERS := stage1 stage2 stage3_pre9otherapp mini_b9s_installer bb3_installer bb3_installer/payload
+SUBFOLDERS := stage1 stage2 stage3_universal_otherapp mini_b9s_installer bb3_installer bb3_installer/payload
+MAKEOPTS :=
 
-.PHONY:    all release clean $(SUBFOLDERS) slotTool
+.PHONY: all release clean $(SUBFOLDERS) slotTool
 
 all: usm.bin slotTool
 
@@ -25,4 +26,6 @@ slotTool: $(SUBFOLDERS)
 	@$(MAKE) -C $@ all
 
 $(SUBFOLDERS):
-	@$(MAKE) -C $@ all
+	@$(MAKE) -C $@ $(MAKEOPTS) all
+
+stage3_universal_otherapp: MAKEOPTS += DEFAULT_PAYLOAD_FILE_OFFSET=0x10000 DEFAULT_PAYLOAD_FILE_NAME="usm.bin" MEMCHUNKHAX_ONLY=1

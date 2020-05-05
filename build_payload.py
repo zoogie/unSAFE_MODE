@@ -11,7 +11,7 @@ with open("bb3_installer/payload/rop_payload.bin","rb") as f:
 with open("stage1/slot1.bin","rb") as f:
 	slot1=f.read()
 
-with open("stage3_pre9otherapp/otherapp.bin","rb") as f:
+with open("stage3_universal_otherapp/otherapp.bin","rb") as f:
 	code=f.read()
 if(len(code) > 0x8000):
 	print("Error: codebin too large")

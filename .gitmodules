@@ -1,0 +1,3 @@
+[submodule "stage3_universal_otherapp"]
+	path = stage3_universal_otherapp
+	url = https://github.com/TuxSH/universal-otherapp.git
