@@ -183,8 +183,39 @@ gadget_eoreq(STACK_PIVOT, 1, 0x3e0, 0x3de)
 gadget(EOREQ_PC, 1, 0x3e6)                        #jump to freedom! (an actual normal rop chain). finally out of this mess - now off to let out some frustration on SAFE_MODE firm :p
 
 
+# Called by stage1
 print("injecting ropbin...")
-inject_codebin("stage1/rop_payload.bin", 1,0x140)
+inject_codebin("rop_payload.bin", 1,0x140)
+
+# Fix CRC16
+STANDARD=0x0000
+MODBUS=0xFFFF
+def fix_crc16(path, offset, size, crc_offset, type):
+	'''
+	CRC-16-Modbus Algorithm
+	'''
+	with open(path,"rb+") as f:
+		f.seek(offset)
+		data=f.read(size)
+		
+		poly=0xA001
+		crc = type
+		for b in data:
+			cur_byte = 0xFF & ord(b)
+			for _ in range(0, 8):
+				if (crc & 0x0001) ^ (cur_byte & 0x0001):
+					crc = (crc >> 1) ^ poly
+				else:
+					crc >>= 1
+				cur_byte >>= 1
+
+		crc16=crc & 0xFFFF
+
+		print("Patching offset %08X..." % crc_offset)
+		f.seek(crc_offset)
+		f.write(struct.pack("<H",crc16))
+
+fix_crc16("slot1.bin", 0x4, 0x410, 0x2, STANDARD)
 
 print("done")
 

@@ -8,15 +8,15 @@
 #include "draw.h"
 #include "screen.h"
 #include "b9s.h"
+#include "cache.h"
+#include "i2c.h"
+#include "utils.h"
+#include "fatfs/sdmmc/sdmmc.h"
+
 //#include "firm.h"
 //#include "boot9strap.h"
 //#include "boot.h"
 //#include "install.h"
-
-
-#define I2C_DEV_MCU 3
-#define HID_PAD (*(vu32 *)0x10146000 ^ 0xFFF)
-
 
 u32 crc32(u8 *data, int size)
 {

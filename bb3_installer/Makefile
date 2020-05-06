@@ -1,3 +1,14 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
+
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
+
+TOPDIR ?= $(CURDIR)
+include $(DEVKITARM)/base_tools
+
 REGION := USA
 ifeq ($(strip $(REGION)),)
 $(error "Set the REGION Makefile parameter.")
@@ -5,7 +16,6 @@ endif
 
 HAXID	:=	0
 HAXNAME := rop_payload
-
 
 
 REGCODE	:=	00
@@ -19,18 +29,21 @@ ifeq ($(REGCODE),00)
 	$(error "Unsupported region.")
 endif
 
+.PHONY: all clean
+
 all:	rop_payload.bin
 
 clean:
-	rm -f $(HAXNAME).elf rop_payload.bin
-	rm -f *.bin
-	rm -f F00D43D5/*.bin
-	rmdir F00D43D5
-	
+	@rm -f $(HAXNAME).elf rop_payload.bin
+	@rm -f *.bin
+	@rm -rf F00D43D5
+	@echo clean ...
+
 
 rop_payload.bin: $(HAXNAME).elf
-	arm-none-eabi-objcopy -O binary $(HAXNAME).elf rop_payload.bin
+	$(OBJCOPY) -O binary $(HAXNAME).elf rop_payload.bin
+	@echo built ... $(notdir $@)
 
 $(HAXNAME).elf:	$(HAXNAME).s
-	arm-none-eabi-gcc -x assembler-with-cpp -nostartfiles -nostdlib -Ttext=0x0ffffe48 $< -o $(HAXNAME).elf
+	$(CC) -x assembler-with-cpp -nostartfiles -nostdlib -Ttext=0x0ffffe48 $< -o $(HAXNAME).elf
 
