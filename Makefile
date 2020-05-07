@@ -4,7 +4,7 @@
 
 NAME := $(notdir $(CURDIR))
 
-SUBFOLDERS := stage1 stage2 stage3_universal_otherapp mini_b9s_installer bb3_installer bb3_installer/payload
+SUBFOLDERS := stage1 stage2 stage3_universal_otherapp mini_b9s_installer bb3_installer bb3_installer/payload bb3_installer/payload/otherapp_template
 MAKEOPTS :=
 
 .PHONY: all release clean $(SUBFOLDERS) slotTool

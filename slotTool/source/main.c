@@ -87,7 +87,7 @@ int cursor=0;
 int menu(u32 n){
 	
 	consoleClear();
-	printf("wifiTool - zoogie\n\n");
+	printf("slotTool - zoogie\n\n");
 
 	char *choices[]={
 		"INSTALL exploit to wifi slots 1,2,3 & shutdown",
