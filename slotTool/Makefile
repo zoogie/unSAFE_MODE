@@ -57,7 +57,7 @@ APP_SYSTEM_MODE_EXT := Legacy
 RSF_FILE			:= resources/cia.rsf
 
 VERSION_MAJOR := 1
-VERSION_MINOR := 2
+VERSION_MINOR := 3
 VERSION_MICRO := 0
 
 #---------------------------------------------------------------------------------

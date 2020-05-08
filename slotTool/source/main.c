@@ -8,86 +8,86 @@
 #include "slot1_bin.h"
 #include "cfgu.h"
 
-u8 cfgData[0xC00]={0};
+u8 workbuf[0xC00]={0};
 const char *yellow="\x1b[33;1m";
 const char *blue="\x1b[34;1m";
 const char *dblue="\x1b[34;0m";
 const char *white="\x1b[37;1m";
+#define HAXX 0x58584148
 
 void fixCRC(u8 *buff){
 	u16 crc16=crc_16(buff+4, 0x410);
 	memcpy(buff+2, &crc16, 2);
 }
 
-void dumpSlot(u32 block, u32 size){
-	char path[0x100];
-	sprintf(path, "/wifi/slot%ld.bin", (block & 0x3)+1);
-	printf("dumping %s...\n", path);
-	Result res=0;
-	memset(cfgData, 0, 0xC00);
-	res = _CFG_GetConfigInfoBlk4(size, block, cfgData);
-	printf("getConfig: %08X\n", (int)res);
-
-	if(!res && memcmp(cfgData + 0x420, "HAXX", 4)){
-		printf("writing file to %s...\n", path);
-		FILE *f=fopen(path,"wb");
-		if(f){
-			fwrite(cfgData, 1, size, f);
-			fclose(f);
+Result check_slots(){
+	printf("%sSlot Status:\n", blue);
+	for(int i=0; i<3; i++){
+		printf("%d)", i+1);
+		_CFG_GetConfigInfoBlk4(0xC00, 0x80000+i, workbuf);
+		if(*(u32*)(workbuf+0x420) == HAXX){
+			printf(" Haxx\n");
 		}
 		else{
-			printf("file write failed!\n");
+			printf(" User\n");
 		}
 	}
-	else{
-		printf("slot dump error!\n");
-	}
-
-	printf("done\n\n");
+	printf("%s\n", white);
+	
+	return 0;
 }
 
-void writeSlot(u32 block, u32 size){
-	char path[0x100];
-	memset(path, 0, 0x100);
-	sprintf(path, "/wifi/slot%ld.bin", (block & 0x3)+1);
-	
-	printf("writing %s...\n", path);
-	Result res=0;
-	FILE *f=fopen(path,"rb");
-	if(f){
-		fread(cfgData, 1, size, f);
-		fclose(f);
-		
-		fixCRC(cfgData);
-		
-		res = _CFG_SetConfigInfoBlk4(size, block, cfgData); //update the nand config savegame to skip setup which fixes a format bricked 2ds
-		printf("setConfig: %08X\n", (int)res);
-		res = _CFG_UpdateConfigSavegame();                         //confirm our changes
-		printf("updateConfig: %08X\n", (int)res);
-	}
-	
-	printf("done\n\n");
-}
-
-void writeBlock(u32 block, u32 size){
-
+Result restore_slots(){
 	Result res;
-	//memset(cfgData, 0x61, size);
+	for(int i=0; i<3; i++){
+		printf("Restoring slot %d... ", i+1);
+		memset(workbuf, 0, 0xC00);
+		_CFG_GetConfigInfoBlk4(0xC00, 0x80000+i, workbuf);
+		if(*(u32*)(workbuf+0x420) == HAXX){
+			memcpy(workbuf, workbuf+0x500, 0x500); //restore backup slot to wifi slot
+			memset(workbuf+0x500, 0, 0x500);       //clear slot backup to zeros
+			res = _CFG_SetConfigInfoBlk4(0xC00, 0x80000+i, workbuf); //commit workbuf to slot
+		}
+		else{
+			res = 1;
+		}
+		if(res) printf(" FAIL\n");
+		else    printf(" GOOD\n");
+	}
+	_CFG_UpdateConfigSavegame();
 	
-	printf("writing cfg...\n");
-	res = _CFG_SetConfigInfoBlk4(size, block, cfgData); //update the nand config savegame 
-	printf("setConfig: %08X\n", (int)res);
-	res = _CFG_UpdateConfigSavegame();                         //confirm our changes
-	printf("updateConfig: %08X\n", (int)res);
-	printf("done\n\n");
+	return 0;
+}
+
+Result inject_slots(){
+	Result res;
+	for(int i=0; i<3; i++){
+		printf("Injecting slot %d... ", i+1);
+		memset(workbuf, 0, 0xC00);
+		_CFG_GetConfigInfoBlk4(0xC00, 0x80000+i, workbuf);
+		if(*(u32*)(workbuf+0x420) == HAXX){
+			res = 1;
+		}
+		else{
+			memcpy(workbuf+0x500, workbuf, 0x500); //backup user slot to slot+0x500
+			memcpy(workbuf, slot1_bin, 0x500);         //write slot1 to workbuf
+			res = _CFG_SetConfigInfoBlk4(0xC00, 0x80000+i, workbuf); //commit workbuf to slot
+		}
+		if(res) printf(" FAIL\n");
+		else    printf(" GOOD\n");
+	}
+	_CFG_UpdateConfigSavegame();
+	 
+	 return 0;
 }
 
 
 int cursor=0;
 int menu(u32 n){
-	
 	consoleClear();
-	printf("slotTool - zoogie\n\n");
+	printf("slotTool v1.3 - zoogie\n\n");
+	
+	check_slots();
 
 	char *choices[]={
 		"INSTALL exploit to wifi slots 1,2,3 & shutdown",
@@ -114,26 +114,21 @@ int menu(u32 n){
 		
 		switch(cursor){
 			case 0:
-			memcpy(cfgData, slot1_bin, slot1_bin_size);
-			fixCRC(cfgData);
-			writeBlock(0x00080000, 0xC00); 
-			writeBlock(0x00080001, 0xC00); 
-			writeBlock(0x00080002, 0xC00); 
+			inject_slots();
 			printf("powering down now...");
 			printf("\n");
-			svcSleepThread(500*1000*1000);
+			svcSleepThread(1000*1000*1000);
 			PTMSYSM_ShutdownAsync(1000*1000*1000);
-			svcSleepThread(0x1000000000LL);
+			while(1) svcSleepThread(100*1000*1000);
 			break;
 			
 			case 1:
-			writeSlot(0x00080000, 0xC00); 
-			writeSlot(0x00080001, 0xC00); 
-			writeSlot(0x00080002, 0xC00); 
-			APT_HardwareResetAsync();
+			restore_slots();
 			printf("rebooting now...");
 			printf("\n");
-			svcSleepThread(500*1000*1000);
+			svcSleepThread(1000*1000*1000);
+			APT_HardwareResetAsync();
+			while(1) svcSleepThread(100*1000*1000);
 			break;
 			
 			case 2:
@@ -145,38 +140,26 @@ int menu(u32 n){
 		svcSleepThread(500*1000*1000);
 	}
 	
-
 	return 0;
-		
-	
 }
-
-
 
 int main(int argc, char* argv[])
 {
 	gfxInitDefault();
 	consoleInit(GFX_TOP, NULL);
-	printf("slotTool - zoogie\n");
-	
-	mkdir("/wifi",0777);
-	srand(time(0));
+	printf("slotTool v1.3 - zoogie\n");
 
 	Result res;
 	//u32 SIZE=0xC00;
 	res = ptmSysmInit();
 	res = nsInit();
 	res = _cfguInit();
-	printf("configInit: %08X\n", (int)res);
-	
-	FILE *t=fopen("/wifi/slot1.bin", "rb"); //quick lazy pre-test to check if backups need to be made
-	if(!t){
-		printf("creating wifi slot backups...\n");
-		fclose(t);
-		for(int i=0;i<3;i++){
-			dumpSlot(0x00080000 + i, 0xC00);
-		}
-		svcSleepThread(2*1000*1000*1000);
+	printf("cfgInit: %08X\n", (int)res);
+	res = _CFG_GetConfigInfoBlk4(0xC00, 0x80000, workbuf);
+	printf("cfgTest: %08X\n", (int)res);
+	if(res){
+		printf("WHAT IS WRONG WITH THE ELF?\nPlease hold power to turn off :(\n");
+		while(1) gspWaitForVBlank();
 	}
 
 	menu(0);

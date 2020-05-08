@@ -41,10 +41,11 @@ General Rop/Code
 - smealum https://github.com/zoogie/ninjhax2.x (ninjhax fork with cfg:s changes - superto and o3ds_newpayloads branches)
 
 Safehax related
-- kartik https://github.com/hax0kartik/pre9otherapp (k11/a9 sploit framework)
+- tuxsh https://github.com/TuxSH/universal-otherapp (v1.2+ complete safehax implementation)
+- kartik https://github.com/hax0kartik/pre9otherapp (<= v1.1 k11/a9 sploit framework)
+- patois https://github.com/patois/Brahma (<= v1.1 firmlaunchhax)
+- tuxsh https://github.com/TuxSH/usr2arm9ldr (<= v1.1 rsaverify)
+- normmatt https://gist.github.com/Normmatt/b72f7323686af5c9cd7 (<= v1.1 rsaverify)
 - aliaspider https://github.com/aliaspider/svchax/ (memchunkhax1)
-- patois https://github.com/patois/Brahma (firmlaunchhax)
-- tuxsh https://github.com/TuxSH/usr2arm9ldr (rsaverify)
-- normmatt https://gist.github.com/Normmatt/b72f7323686af5c9cd7 (rsaverify)
 - SciresM https://github.com/SciresM/boot9strap (mini b9s installer template & b9s itself)
-- AuroraWright https://github.com/AuroraWright/SafeA9LHInstaller (writefirm)
+- AuroraWright https://github.com/AuroraWright/SafeA9LHInstaller (writefirm for mini b9s installer)

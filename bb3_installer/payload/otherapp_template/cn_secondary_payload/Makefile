@@ -73,6 +73,7 @@ clean:
 -include $(DFILES)
 
 build/%.o: source/%.c
+	@mkdir -p build
 	$(CC) $(CFLAGS) -c $< -o $@
 	@$(CC) $(DEFINES) -MM $< > build/$*.d
 
