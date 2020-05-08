@@ -1,6 +1,6 @@
 import os,sys,struct,binascii
 
-payload="\x00"*0x20000
+payload=b"\x00"*0x20000
 
 with open("stage2/LoadCodeMset.dat","rb") as f:
 	rop=f.read()

@@ -102,13 +102,13 @@ def check(r5,r4,a): #no need to use this anymore, my address convert functions w
 	print("FAIL - %08X" % a)
 	
 def format_exploit_slot(slotnum):
-	pad="\x00"
-	slot="\x01" + pad*3 + "\x01\x01" + pad*2 + "Haaaaaaaxxxxxxxxxxxxxxxx" + "\x19\x07\x99\x38\x33\xD8\xD3\x19\x20" + pad*0x33f + "\x01\x01\x01\x00" + "\x44"*0xa5 + pad + "\x78\x05" + pad*12 + "HAXX" + pad*0x7dc
+	pad=b"\x00"
+	slot=b"\x01" + pad*3 + b"\x01\x01" + pad*2 + b"Haaaaaaaxxxxxxxxxxxxxxxx" + b"\x19\x07\x99\x38\x33\xD8\xD3\x19\x20" + pad*0x33f + b"\x01\x01\x01\x00" + b"\x44"*0xa5 + pad + b"\x78\x05" + pad*12 + b"HAXX" + pad*0x7dc
 	with open("slot%d.bin" % slotnum,"wb+") as f:
 		f.write(slot)
 		
 def inject_codebin(srcpath, slot,off):
-	pad="\x00"*0x100
+	pad=b"\x00"*0x100
 	with open(srcpath,"rb") as f:
 		buff=f.read()
 	with open("slot%d.bin" % slot,"rb+") as f:
@@ -201,7 +201,11 @@ def fix_crc16(path, offset, size, crc_offset, type):
 		poly=0xA001
 		crc = type
 		for b in data:
-			cur_byte = 0xFF & ord(b)
+			if sys.version_info[0] >= 3:
+				cur_byte = 0xFF & int(b)
+			else:
+				cur_byte = 0xFF & ord(b)
+				
 			for _ in range(0, 8):
 				if (crc & 0x0001) ^ (cur_byte & 0x0001):
 					crc = (crc >> 1) ^ poly
