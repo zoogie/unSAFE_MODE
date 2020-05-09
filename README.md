@@ -39,6 +39,7 @@ General Rop/Code
 - yellows8 https://github.com/yellows8/3ds_ropkit (otherapp loader)
 - dukesrg https://github.com/dukesrg/rop3ds (rop templates, macros)
 - smealum https://github.com/zoogie/ninjhax2.x (ninjhax fork with cfg:s changes - superto and o3ds_newpayloads branches)
+- DeadPhoenix https://usm.bruteforcemovable.com/ (hosting bb3 usm installer and providing good project feedback)
 
 Safehax related
 - tuxsh https://github.com/TuxSH/universal-otherapp (v1.2+ complete safehax implementation)
