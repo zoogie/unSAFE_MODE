@@ -22,8 +22,8 @@ void drawCharacter(u8* fb, char c, u16 x, u16 y)
 		u8 v=*(charData++);
 		for(j=0;j<CHAR_SIZE_Y;j++)
 		{
-			if(v&1)fb[0]=fb[1]=fb[2]=0x00;
-			else fb[0]=fb[1]=fb[2]=0xFF;
+			if(v&1)fb[0]=fb[1]=fb[2]=0xFF;
+			else fb[0]=fb[1]=fb[2]=0x00;
 			fb+=3;
 			v>>=1;
 		}

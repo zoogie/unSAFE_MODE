@@ -7,9 +7,15 @@ with open("stage2/LoadCodeMset.dat","rb") as f:
 	
 with open("bb3_installer/payload/rop_payload.bin","rb") as f:
 	bb3_rop=f.read()
+if(len(bb3_rop) > 0x1000):
+	print("Error: bb3 ropbin too large")
+	sys.exit(0)
 
-with open("bb3_installer/payload/otherapp_template/otherapp.bin","rb") as f:
-	bb3_code=f.read()	
+with open("bb3_installer/payload/otherapp_template/otherapp_template.bin","rb") as f:
+	bb3_code=f.read()
+if(len(bb3_code) > 0x2000):
+	print("Error: bb3 codebin too large")
+	sys.exit(0)	
 
 with open("stage1/slot1.bin","rb") as f:
 	slot1=f.read()

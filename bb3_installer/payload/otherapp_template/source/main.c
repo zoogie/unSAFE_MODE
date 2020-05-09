@@ -208,9 +208,9 @@ void drawTitleScreen(char* str)
 {
 	clearScreen(0x00);
 	centerString("Bannerbomb3 by zoogie",0);
-	centerString("https://3ds.hacks.guide/",10);
-	centerString("Help: https://discord.gg/C29hYvh",20);
-	renderString(str, 0, 70);
+	centerString("https://3ds.hacks.guide/",1*8);
+	centerString("Help: https://discord.gg/C29hYvh",2*8);
+	renderString(str, 0, 7*8);
 }
 
 Result NS_RebootSystem(Handle handle, u32 command)
@@ -283,7 +283,6 @@ Result _CFG_SetConfigInfoBlk4(u32 blkID, u8* inData)
 	return (Result)cmdbuf[1];
 }
 
-
 Result _CFG_UpdateConfigSavegame()
 {
 	Result ret = 0;
@@ -297,17 +296,19 @@ Result _CFG_UpdateConfigSavegame()
 }
 
 Result check_slots(){
-	int y=70;
-	renderString("Slot Status:  ", 0, y);
+	int y=7*8;
+	renderString("Slot Status:      ", 0, y);
 	for(int i=0; i<3; i++){
-		y+=10;
+		y+=1*8;
 		drawHex(i+1, 0, y);
 		 _CFG_GetConfigInfoBlk4(0x80000+i, workbuf);
+		 renderString("          ", 8*8, y);
+		 svc_sleepThread(100*1000*1000);
 		if(*(u32*)(workbuf+0x420) == HAXX){
-			renderString("  Haxx", 64, y);
+			renderString("  Haxx    ", 8*8, y);
 		}
 		else{
-			renderString("  User", 64, y);
+			renderString("  User    ", 8*8, y);
 		}
 	}
 	
@@ -328,6 +329,7 @@ Result restore_slots(){
 		}
 	}
 	 _CFG_UpdateConfigSavegame();
+	check_slots();
 	
 	return 0;
 }
@@ -347,8 +349,27 @@ Result inject_slots(){
 		}
 	}
 	 _CFG_UpdateConfigSavegame();
+	 check_slots();
 	 
 	 return 0;
+}
+
+Result render(int cursor){
+	int y=12*8;
+	renderString("  Inject haxx     ", 0, y);
+	renderString("  Restore slots   ", 0, y+8);
+	renderString("  Exit            ", 0, y+16);
+	renderString("->", 0, y+(cursor*8));
+	return 0;
+}
+
+Result confirm(int y){
+	renderString("Press A to confirm     ",0 , y);
+	
+	while(1){
+		if(HID_PAD & PAD_A) break;
+	}
+	return 0;
 }
 
 int main(int loaderparam, char** argv)
@@ -360,7 +381,9 @@ int main(int loaderparam, char** argv)
 	//Handle cfgHandle;  using defines to avoid globals that require DATA and BSS section
 	Handle nsHandle;
 	Result res;
-	int y=40;
+	int cursor=0;
+	int oldcurs=cursor;
+	int y=4*8;
 	
 	Handle* gspHandle=(Handle*)GSPGPU_SERVHANDLEADR;
 	u32 *linear_buffer = (u32*)VRAM;
@@ -378,51 +401,67 @@ int main(int loaderparam, char** argv)
 	 
 	res = _srv_getServiceHandle(&cptr, cfgHandle, "cfg:i");
 	renderString("cfg:i ", 0, y);
-	drawHex(res, 48, y); //cfg:i get result
+	drawHex(res, 6*8, y); //cfg:i get result
 	if(res){
-		renderString("WHAT IS WRONG WITH THE ELF?", 0, y+10);
-		renderString("Hold power to turn off :(", 0, y+20);
+		renderString("WHAT IS WRONG WITH THE ELF?", 0, y+8);
+		renderString("Hold power to turn off :(", 0, y+16);
 		while(1) svc_sleepThread(100*1000*1000);
 	}
 	
 	_initSrv(&nptr);
 	res = _srv_getServiceHandle(&nptr, &nsHandle, "ns:s");
-	renderString("ns:s  ", 0, y+10);
-	drawHex(res, 48, y+10); //ns:s get result
-	
-	y=120;
-	centerString("Press...                     ", y+=10);
-	centerString("L+R shoulder -> Inject haxx  ", y+=10);
-	centerString("Dpad  Up + A -> Restore slots", y+=10);
-	centerString("START        -> Exit         ", y+=10);
+	renderString("ns:s  ", 0, y+8);
+	drawHex(res, 48, y+1*8); //ns:s get result
 	
 	check_slots();     //shows status of all 3 slots (haxx or user)
+	render(cursor);
 	
 	while(1){
 		svc_sleepThread(17*1000*1000);
-		if(HID_PAD & PAD_START){
-			drawTitleScreen("Exiting now");
-			svc_sleepThread(0x40000000);
-			break;
+		if     (HID_PAD & PAD_UP)   cursor--;
+		else if(HID_PAD & PAD_DOWN) cursor++;
+		
+		if      (cursor < 0) cursor=2;
+		else if (cursor > 2) cursor=0;
+		
+		if(cursor ^ oldcurs){
+			render(cursor); 
+			svc_sleepThread(250*1000*1000);
 		}
-		else if ((HID_PAD & PAD_L) && (HID_PAD & PAD_R)){
-			inject_slots();
-			drawTitleScreen("Slots injected!");
-			svc_sleepThread(0x40000000);
-			drawTitleScreen("Shutting down now...");
-			svc_sleepThread(0x40000000);
-			NS_RebootSystem(nsHandle, 0xE0000);
-			while(1) svc_sleepThread(100*1000*1000);
-		}
-		else if ((HID_PAD & PAD_UP) && (HID_PAD & PAD_A)){
-			restore_slots();
-			drawTitleScreen("Slots restored!");
-			svc_sleepThread(0x40000000);
-			break;
-		}
+		
+		if(HID_PAD & PAD_A) break;
+		oldcurs=cursor;
 	}
- 
-	drawTitleScreen("Rebooting...");
+	
+	switch(cursor){
+		
+		case 0:
+		inject_slots();
+		renderString("unSAFE_MODE INSTALLED!!", 0, 16*8);   //try to be super obvious what's happened 
+		svc_sleepThread(1000*1000*1000);		 //so hopefully no unnecessary trips to discord due to confusion
+		confirm(17*8);
+		renderString("Shutting down now...   ", 0, 19*8);
+		svc_sleepThread(1000*1000*1000);
+		NS_RebootSystem(nsHandle, 0xE0000);              //this is a power down
+		while(1) svc_sleepThread(100*1000*1000); 
+	
+		case 1:
+		restore_slots();
+		renderString("Wifi slots restored!!  ", 0, 16*8);   //try to be super obvious what's happened 
+		svc_sleepThread(1000*1000*1000);		 //so hopefully no unnecessary trips to discord due to confusion
+		confirm(17*8);
+		renderString("Rebooting now...       ", 0, 19*8);
+		svc_sleepThread(1000*1000*1000);
+		break;
+		
+		case 2:
+		renderString("Rebooting now...       ", 0, 16*8);
+		svc_sleepThread(1000*1000*1000);
+		break;
+		
+		default:;
+	}
+	
 	NS_RebootSystem(nsHandle, 0x160000);
 	while(1) svc_sleepThread(100*1000*1000);
 	return 0;

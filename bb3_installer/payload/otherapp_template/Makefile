@@ -10,21 +10,78 @@ ifeq ($(filter $(DEVKITARM)/bin,$(PATH)),)
 export PATH:=$(DEVKITARM)/bin:$(PATH)
 endif
 
-OUTNAME = "otherapp"
-PAYLOAD_SRCPATH	:=	cn_secondary_payload/cn_secondary_payload.bin
+DEFINES	:=	
+LDPATH	:=	ccd00.ld
 
-SCRIPTS = "scripts"
+ifneq ($(strip $(LOADROPBIN)),)
+	DEFINES	:=	$(DEFINES) -DLOADROPBIN=1
+endif
 
-all: $(OUTNAME).bin
 
-$(OUTNAME).bin: $(PAYLOAD_SRCPATH)
-	@cp $(PAYLOAD_SRCPATH) $(OUTNAME).bin
+DEFINES	:=	$(DEFINES) -DOTHERAPP=1
+LDPATH	:=	otherapp.ld
 
-cn_secondary_payload/cn_secondary_payload.bin:
-	@mkdir -p cn_secondary_payload/data
-	@cd cn_secondary_payload && make
+
+CC = arm-none-eabi-gcc
+# LINK = arm-none-eabi-gcc
+LINK = arm-none-eabi-ld
+AS = arm-none-eabi-as
+OBJCOPY = arm-none-eabi-objcopy
+CFLAGS += -Wall -std=c99 -march=armv6 -Os -I"$(CTRULIB)/include" -I$(DEVKITPRO)/libnds/include $(DEFINES)
+LDFLAGS += --script=$(LDPATH) -L"$(DEVKITARM)/arm-none-eabi/lib" -L"$(CTRULIB)/lib" -Map=output.map
+
+CFILES = $(wildcard source/*.c)
+BINFILES = $(wildcard data/*.bin)
+OFILES = $(BINFILES:data/%.bin=build/%.bin.o)
+OFILES += $(CFILES:source/%.c=build/%.o)
+DFILES = $(CFILES:source/%.c=build/%.d)
+SFILES = $(wildcard source/*.s)
+OFILES += $(SFILES:source/%.s=build/%.o)
+PROJECTNAME = ${shell basename "$(CURDIR)"}
+CWD = "$(CURDIR)""
+
+#---------------------------------------------------------------------------------
+# canned command sequence for binary data, taken from devkitARM
+#---------------------------------------------------------------------------------
+define bin2o
+	bin2s $< | $(AS) -o $(@)
+	echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"_end[];" > source/`(echo $(<F) | tr . _)`.h
+	echo "extern const u8" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"[];" >> source/`(echo $(<F) | tr . _)`.h
+	echo "extern const u32" `(echo $(<F) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`_size";" >> source/`(echo $(<F) | tr . _)`.h
+endef
+
+.PHONY:=all
+
+all: $(PROJECTNAME).bin
+
+ctrulib:
+	#cd "$(CTRULIB)" && make
+
+$(PROJECTNAME).bin: $(PROJECTNAME).elf
+	$(OBJCOPY) -O binary $< $@
+
+$(PROJECTNAME).elf: $(OFILES) ctrulib
+	$(LINK) $(LDFLAGS) -o $(PROJECTNAME).elf $(filter-out build/crt0.o, $(OFILES)) -g -lctru -lm -lc -lg
+
 clean:
-	@rm -rf build/*
-	@rm otherapp.bin
-	@cd cn_secondary_payload && make clean
+	@rm -f build/*.o build/*.d
+	@rm -f output.map
+	@rm -f $(PROJECTNAME).elf $(PROJECTNAME).bin
+	@rm -f data/*
 	@echo "all cleaned up !"
+
+-include $(DFILES)
+
+build/%.o: source/%.c
+	@mkdir -p build
+	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(DEFINES) -MM $< > build/$*.d
+
+build/%.o: source/%.s
+	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(DEFINES) -MM $< > build/$*.d
+
+build/%.bin.o: data/%.bin
+	@echo $(notdir $<)
+	@$(bin2o)
+
