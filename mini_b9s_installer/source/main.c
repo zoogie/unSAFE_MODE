@@ -152,7 +152,7 @@ void main(void)
 		if	(fail_f0==5)  drawStringCenter("NAND error (FIRM0)",13);
 		else if	(fail_f0==1)  drawStringCenter("You already have B9S! (FIRM0)",13); 
 		else if (fail_f0==0)  drawStringCenter("B9S install SUCCESS! (FIRM0)",13); 
-		else                  drawStringCenter("WHAT IS WRONG WITH THE ELF?",13);
+		else                  drawStringCenter("WHAT IS WRONG WITH THE ELF? (FIRM0)",13);
 		
 		if	(fail_f0==5)  drawStringCenter("Skipped (FIRM1)",14); 
 		else if	(fail_f1==5)  drawStringCenter("NAND error (FIRM1)",14);  	
