@@ -347,6 +347,20 @@ void readFirm0(u8 *outbuf, u32 size)
     aes(outbuf, outbuf, size / AES_BLOCK_SIZE, tmpCtr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 }
 
+void readFirm1(u8 *outbuf, u32 size)
+{
+    __attribute__((aligned(4))) u8 tmpCtr[sizeof(nandCtr)];
+    memcpy(tmpCtr, nandCtr, sizeof(nandCtr));
+    aes_advctr(tmpCtr, 0x0B530000 / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
+
+    //Read from NAND
+    sdmmc_nand_readsectors(0x0B530000 / 0x200, size / 0x200, outbuf);
+
+    //Decrypt
+    aes_use_keyslot(0x06);
+    aes(outbuf, outbuf, size / AES_BLOCK_SIZE, tmpCtr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+}
+
 void writeFirm(u8 *inbuf, bool isFirm1, u32 size)
 {
     u32 offset = isFirm1 ? 0x0B530000 : 0x0B130000;

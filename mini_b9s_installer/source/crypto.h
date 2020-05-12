@@ -83,6 +83,7 @@ void getNandCtr(void);
 int ctrNandInit(void);
 int ctrNandRead(u32 sector, u32 sectorCount, u8 *outbuf);
 void readFirm0(u8 *outbuf, u32 size);
+void readFirm1(u8 *outbuf, u32 size);
 void writeFirm(u8 *inbuf, bool isFirm1, u32 size);
 void setupKeyslot0x11(const void *otp);
 void generateSector(u8 *keySector, u32 mode);
