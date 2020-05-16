@@ -149,16 +149,16 @@ void main(void)
 	else               drawStringCenter("WHAT IS WRONG WITH THE ELF?",13);
 	
 	if(fail==0){
-		if	(fail_f0==5)  drawStringCenter("NAND error (FIRM0)",13);
-		else if	(fail_f0==1)  drawStringCenter("You already have B9S! (FIRM0)",13); 
-		else if (fail_f0==0)  drawStringCenter("B9S install SUCCESS! (FIRM0)",13); 
-		else                  drawStringCenter("WHAT IS WRONG WITH THE ELF? (FIRM0)",13);
+		if	(fail_f0==5)  drawStringCenter("[FIRM0] NAND error",13);
+		else if	(fail_f0==1)  drawStringCenter("[FIRM0] You already have B9S!",13); 
+		else if (fail_f0==0)  drawStringCenter("[FIRM0] B9S install SUCCESS!",13); 
+		else                  drawStringCenter("[FIRM0] WHAT IS WRONG WITH THE ELF?",13);
 		
-		if	(fail_f0==5)  drawStringCenter("Skipped (FIRM1)",14); 
-		else if	(fail_f1==5)  drawStringCenter("NAND error (FIRM1)",14);  	
-		else if (fail_f1==1)  drawStringCenter("You already have B9S! (FIRM1)",14);  
-		else if (fail_f1==0)  drawStringCenter("B9S install SUCCESS! (FIRM1)",14); 
-		else                  drawStringCenter("WHAT IS WRONG WITH THE ELF? (FIRM1)",14);
+		if	(fail_f0==5)  drawStringCenter("[FIRM1] Skipped",14); 
+		else if	(fail_f1==5)  drawStringCenter("[FIRM1] NAND error",14);  	
+		else if (fail_f1==1)  drawStringCenter("[FIRM1] You already have B9S!",14);  
+		else if (fail_f1==0)  drawStringCenter("[FIRM1] B9S install SUCCESS!",14); 
+		else                  drawStringCenter("[FIRM1] WHAT IS WRONG WITH THE ELF?",14);
 	}	
 	
 	drawStringCenter("Press any key to reboot",16);

@@ -17,7 +17,7 @@
 #define slot1 (u8*)(0x00682000+0x1F000)
 #define cfgHandle (u32*)0x00600000
 #define HAXX 0x58584148
-//u8 *top_ptr=(u8*)1;
+#define CLEAR (PAD_L | PAD_R | PAD_Y | PAD_LEFT)   //combo for deleting all wifi slots
 
 typedef enum
 {
@@ -152,8 +152,6 @@ Result GSP_FlushDCache(u32* addr, u32 size)
 	_GSP_FlushDCache=(void*)GSPGPU_FlushDataCache;
 	return _GSP_FlushDCache(addr, size);
 }
-
-
 
 const u8 hexTable[]=
 {
@@ -296,6 +294,8 @@ Result _CFG_UpdateConfigSavegame()
 }
 
 Result check_slots(){
+	u8 *zerobuf=(u8*)(workbuf+0xC00);
+	memset(zerobuf, 0, 0x500);
 	int y=7*8;
 	renderString("Slot Status:      ", 0, y);
 	for(int i=0; i<3; i++){
@@ -307,8 +307,11 @@ Result check_slots(){
 		if(*(u32*)(workbuf+0x420) == HAXX){
 			renderString("  Haxx    ", 8*8, y);
 		}
-		else{
+		else if(memcmp(zerobuf, workbuf, 0x500)){
 			renderString("  User    ", 8*8, y);
+		}
+		else{
+			renderString("  None    ", 8*8, y);
 		}
 	}
 	
@@ -335,7 +338,6 @@ Result restore_slots(){
 }
 
 Result inject_slots(){
-
 	for(int i=0; i<3; i++){
 		memset(workbuf, 0, 0xC00);
 		_CFG_GetConfigInfoBlk4(0x80000+i, workbuf);
@@ -352,6 +354,35 @@ Result inject_slots(){
 	 check_slots();
 	 
 	 return 0;
+}
+
+Result clear_slots(){
+	int count=0;
+	Result res;
+	while(1){
+		if(HID_PAD == CLEAR){
+			count++;
+			if(count > 5*60) break;  //if combo held for 5 seconds, proceed.
+		}
+		else{
+			return 0;
+		}
+		svc_sleepThread(17*1000*1000);
+	}
+	
+	Result (* const delete_slot)(u32) = (void *)0x001F86B0;  //this is amazing. works perfectly, and even deletes the annoying nvram backup.
+	
+	res = delete_slot(0);
+	res = delete_slot(1);
+	res = delete_slot(2);
+	 
+	check_slots();
+
+	renderString("All slots cleared!", 0, 16*8);
+	svc_sleepThread(2000*1000*1000);
+	renderString("                  ", 0, 16*8);
+
+	return 0;
 }
 
 Result render(int cursor){
@@ -395,13 +426,13 @@ int main(int loaderparam, char** argv)
 	_GSPGPU_SetBufferSwap(*gspHandle, 0, (GSP_FramebufferInfo){0, (u32*)top_framebuffer, (u32*)top_framebuffer, 240 * 3, (1<<8)|(1<<6)|1, 0, 0});
 	_GSPGPU_SetBufferSwap(*gspHandle, 1, (GSP_FramebufferInfo){0, (u32*)low_framebuffer, (u32*)low_framebuffer, 240 * 3, 1, 0, 0});
 	
-	 _initSrv(&cptr);
 	 
 	drawTitleScreen("");
 	 
+	_initSrv(&cptr);
 	res = _srv_getServiceHandle(&cptr, cfgHandle, "cfg:i");
-	renderString("cfg:i ", 0, y);
-	drawHex(res, 6*8, y); //cfg:i get result
+	renderString("cfg:i   ", 0, y);
+	drawHex(res, 8*8, y); //cfg:i get result
 	if(res){
 		renderString("WHAT IS WRONG WITH THE ELF?", 0, y+8);
 		renderString("Hold power to turn off :(", 0, y+16);
@@ -410,8 +441,8 @@ int main(int loaderparam, char** argv)
 	
 	_initSrv(&nptr);
 	res = _srv_getServiceHandle(&nptr, &nsHandle, "ns:s");
-	renderString("ns:s  ", 0, y+8);
-	drawHex(res, 48, y+1*8); //ns:s get result
+	renderString("ns:s    ", 0, y+8);
+	drawHex(res, 8*8, y+1*8); //ns:s get result
 	
 	check_slots();     //shows status of all 3 slots (haxx or user)
 	render(cursor);
@@ -431,6 +462,7 @@ int main(int loaderparam, char** argv)
 		
 		if(HID_PAD & PAD_A) break;
 		oldcurs=cursor;
+		clear_slots();
 	}
 	
 	switch(cursor){
@@ -438,25 +470,25 @@ int main(int loaderparam, char** argv)
 		case 0:
 		inject_slots();
 		renderString("unSAFE_MODE INSTALLED!!", 0, 16*8);   //try to be super obvious what's happened 
-		svc_sleepThread(1000*1000*1000);		 //so hopefully no unnecessary trips to discord due to confusion
-		confirm(17*8);
-		renderString("Shutting down now...   ", 0, 19*8);
-		svc_sleepThread(1000*1000*1000);
-		NS_RebootSystem(nsHandle, 0xE0000);              //this is a power down
+		svc_sleepThread(500*1000*1000);		    //so hopefully no unnecessary trips to discord due to confusion
+		//confirm(17*8);
+		renderString("Shutting down now...   ", 0, 18*8);
+		svc_sleepThread(2000*1000*1000);
+		NS_RebootSystem(nsHandle, 0xE0000);                 //this is a power down
 		while(1) svc_sleepThread(100*1000*1000); 
 	
 		case 1:
 		restore_slots();
 		renderString("Wifi slots restored!!  ", 0, 16*8);   //try to be super obvious what's happened 
-		svc_sleepThread(1000*1000*1000);		 //so hopefully no unnecessary trips to discord due to confusion
-		confirm(17*8);
-		renderString("Rebooting now...       ", 0, 19*8);
-		svc_sleepThread(1000*1000*1000);
+		svc_sleepThread(500*1000*1000);		    //so hopefully no unnecessary trips to discord due to confusion
+		//confirm(17*8);
+		renderString("Rebooting now...       ", 0, 18*8);
+		svc_sleepThread(2000*1000*1000);
 		break;
 		
 		case 2:
 		renderString("Rebooting now...       ", 0, 16*8);
-		svc_sleepThread(1000*1000*1000);
+		svc_sleepThread(2000*1000*1000);
 		break;
 		
 		default:;
