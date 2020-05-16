@@ -358,7 +358,6 @@ Result inject_slots(){
 
 Result clear_slots(){
 	int count=0;
-	Result res;
 	while(1){
 		if(HID_PAD == CLEAR){
 			count++;
@@ -372,9 +371,9 @@ Result clear_slots(){
 	
 	Result (* const delete_slot)(u32) = (void *)0x001F86B0;  //this is amazing. works perfectly, and even deletes the annoying nvram backup.
 	
-	res = delete_slot(0);
-	res = delete_slot(1);
-	res = delete_slot(2);
+	delete_slot(0);
+	delete_slot(1);
+	delete_slot(2);
 	 
 	check_slots();
 
