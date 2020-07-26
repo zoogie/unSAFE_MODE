@@ -85,7 +85,7 @@ Result inject_slots(){
 int cursor=0;
 int menu(u32 n){
 	consoleClear();
-	printf("slotTool v1.3 - zoogie\n\n");
+	printf("slotTool v1.4 - zoogie\n\n");
 	
 	check_slots();
 
@@ -147,22 +147,27 @@ int main(int argc, char* argv[])
 {
 	gfxInitDefault();
 	consoleInit(GFX_TOP, NULL);
-	printf("slotTool v1.3 - zoogie\n");
+	printf("slotTool v1.4 - zoogie\n");
 
 	Result res;
-	//u32 SIZE=0xC00;
+	u32 fail=0;
 	res = ptmSysmInit();
 	res = nsInit();
 	res = _cfguInit();
 	printf("cfgInit: %08X\n", (int)res);
 	res = _CFG_GetConfigInfoBlk4(0xC00, 0x80000, workbuf);
-	printf("cfgTest: %08X\n", (int)res);
+	printf("cfgTest: %08X\n\n", (int)res);
+	
 	if(res){
-		printf("WHAT IS WRONG WITH THE ELF?\nPlease hold power to turn off :(\n");
-		while(1) gspWaitForVBlank();
+		printf("WHAT IS WRONG WITH THE ELF?\n");
+		printf("A: I need my takeover .xml!\n");
+		printf("(hint: sd:/3ds/slotTool/slotTool.xml)\n\n");
+		printf("Press any key to exit :(\n");
+		fail=1;
 	}
-
-	menu(0);
+	else{
+		menu(0);
+	}
 
 	while (aptMainLoop())
 	{
@@ -171,7 +176,8 @@ int main(int argc, char* argv[])
 		hidScanInput();
 		u32 kDown = hidKeysDown();
 		
-		if(kDown){
+		if(kDown & 0xfff){
+			if(fail) break;
 			res = menu(kDown);
 			if(res) break;
 		}

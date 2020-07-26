@@ -40,7 +40,7 @@ DATA		:=	data
 INCLUDES	:=	include include/graphics include/services
 #ROMFS		:=	romfs
 
-APP_TITLE		:= slotTool
+APP_TITLE		:= slotTool v1.4
 APP_DESCRIPTION		:= unSAFE_MODE installer
 APP_AUTHOR		:= Zoogie
 
@@ -57,7 +57,7 @@ APP_SYSTEM_MODE_EXT := Legacy
 RSF_FILE			:= resources/cia.rsf
 
 VERSION_MAJOR := 1
-VERSION_MINOR := 3
+VERSION_MINOR := 4
 VERSION_MICRO := 0
 
 #---------------------------------------------------------------------------------
