@@ -12,9 +12,9 @@
 #define HID_PAD (*(vu32*)0x1000001C)
 #define GSPGPU_FlushDataCache 0x0013e46c
 #define GSPGPU_SERVHANDLEADR 0x002993c4
-#define VRAM ((u32)0x31000000)
-#define workbuf (u8*)0x00690000
-#define slot1 (u8*)(0x00682000+0x1F000)
+u32 VRAM=(u32)0x31000000;
+u8 *workbuf;
+u8 *slot1=(u8*)(0x00682000+0x1F000);
 #define cfgHandle (u32*)0x00600000
 #define HAXX 0x58584148
 #define CLEAR (PAD_L | PAD_R | PAD_Y | PAD_LEFT)   //combo for deleting all wifi slots
@@ -404,7 +404,7 @@ Result confirm(int y){
 
 int main(int loaderparam, char** argv)
 {
-	//u8 *workbuf=(u8*)0x00690000;
+	workbuf=(u8*)0x00690000;
 	//u8 *slot1=(u8*)(0x00682000+0x1F000);
 	Handle cptr;
 	Handle nptr;
